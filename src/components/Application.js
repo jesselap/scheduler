@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import DayList from "components/DayList";
 import Appointment from "components/Appointment";
-import { getAppointmentsForDay } from "helpers/selectors"
+import { getAppointmentsForDay, getInterview, getInterviewersForDay } from "helpers/selectors"
 
 import "components/Application.scss";
 
@@ -17,7 +17,42 @@ export default function Application(props) {
     interviewers: {}
   });
 
+  const bookInterview = (id, interview) => {
+    const appointment = {
+      ...state.appointments[id],
+      interview: { ...interview }
+    };
+    
+    const appointments = {
+      ...state.appointments,
+      [id]: appointment
+    };
+
+    setState({
+      ...state,
+      appointments
+    });
+  }
+  
+
   const dailyAppointments = getAppointmentsForDay(state, state.day);
+  const dailyInterviewers = getInterviewersForDay(state, state.day);
+
+  const schedule = dailyAppointments.map((appointment) => {
+    const interview = getInterview(state, appointment.interview);
+  
+    return (
+      <Appointment
+        key={appointment.id}
+        id={appointment.id}
+        time={appointment.time}
+        interview={interview}
+        interviewers={dailyInterviewers}
+        bookInterview={bookInterview}
+      />
+    );
+  });
+
 
   const setDay = day => setState({ ...state, day });
   
@@ -36,7 +71,7 @@ export default function Application(props) {
       }));
     });
   }, []);
-
+ 
 
   return (
     <main className="layout">
@@ -61,9 +96,7 @@ export default function Application(props) {
       />
       </section>
       <section className="schedule">
-        {dailyAppointments.map(appointment => {
-          return <Appointment key={appointment.id} {...appointment} />
-        })}
+        {schedule}
         <Appointment key="last" time="5pm" />
       </section>
     </main>
