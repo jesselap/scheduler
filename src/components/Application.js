@@ -26,7 +26,6 @@ export default function Application(props) {
       ...state.appointments,
       [id]: appointment
     };
-
     return axios.put(`/api/appointments/${id}`, appointment)
       .then(res => {
         setState({
@@ -34,11 +33,25 @@ export default function Application(props) {
           appointments
         });
       })
-  }
+  };
 
   const deleteInterview = (id, interview) => {
-    
-  }
+    const appointment = {
+      ...state.appointments[id],
+      interview: {...interview}
+    };
+    const appointments = {
+      ...state.appointments,
+      [id]: appointment
+    };
+    return axios.delete(`/api/appointments/${id}`)
+      .then(res => {
+        setState({
+          ...state, 
+          appointments
+        });
+      });
+  };
   
 
   const dailyAppointments = getAppointmentsForDay(state, state.day);
@@ -55,6 +68,7 @@ export default function Application(props) {
         interview={interview}
         interviewers={dailyInterviewers}
         bookInterview={bookInterview}
+        deleteInterview={deleteInterview}
       />
     );
   });
